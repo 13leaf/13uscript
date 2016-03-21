@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Easy Voa Listen and write
 // @namespace    http://fengwang.org.cn
-// @version      0.2
+// @version      0.3
 // @description  voa enhance listen to write
 // @author       wangfeng
 // @require http://code.jquery.com/jquery-1.9.1.js
