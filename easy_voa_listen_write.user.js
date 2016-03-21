@@ -5,12 +5,34 @@
 // @description  voa enhance listen to write
 // @author       wangfeng
 // @require http://code.jquery.com/jquery-1.9.1.js
-// @require http://ejohn.org/files/jsdiff.js
+// @require https://cdn.jsdelivr.net/jsdiff/1.4.0/diff.min.js
 // @match        http://www.easyvoa.com/voa-speacial-english/*
 // @grant        none
 // ==/UserScript==
 /* jshint -W097 */
 'use strict';
+
+/*
+shortcut:
+ctrl+c : 播放/暂停
+ctrl+m : 标记播放起始位置
+ctrl+z : 退回起始位置重新播放
+ctrl+< : 回退5秒
+ctrl+> : 快进5秒
+ctrl+; : 慢速30%
+ctrl+' : 快速30%
+*/
+window.JsDiff = JsDiff;
+
+function addGlobalStyle(css) {
+   var head, style;
+   head = document.getElementsByTagName('head')[0];
+   if (!head) { return; }
+   style = document.createElement('style');
+   style.type = 'text/css';
+   style.innerHTML = css;
+   head.appendChild(style);
+}
 
 function displayShortCuts(){
     var shortKeys = {
@@ -33,9 +55,10 @@ function displayShortCuts(){
 function main(){
     var audioUrl = $('#playbar a').attr('href');
     if(!audioUrl) return;
+    addGlobalStyle('del {       text-decoration: none;  color: #b30000; background: #fadad7;} ins {     background: #eaf2c2;    color: #406619; text-decoration: none;}');
     $('#playbar').after($('<div class="enhance-toolbar-wrapper">'+
-                          '<audio style="width:100%" controls="" src="'+audioUrl+'"></audio><textarea style="width:100%;height: 1000px;padding:12px;font-size:17px;"></textarea>'+
-                          '<button id="btnTogglePara">查看原文</button></div>'+'<div class="diff-result" sytle="font-size:18px;line-height:1.5;"></div>'
+                          '<audio style="width:100%" controls="" src="'+audioUrl+'"></audio><textarea style="width:100%;height: 1000px;padding:12px;font-size:18px;"></textarea>'+
+                          '<button id="btnTogglePara">查看原文</button></div>'+'<div class="diff-result" contenteditable="true" style="font-size:16px;line-height:1.5;white-space:pre-wrap;position:fixed;top:7px;right:7px;width:30%;background:white;height:100%;overflow-y:auto;"></div>'
                          ));
     displayShortCuts();
     $('#content_main p').toggle();
@@ -45,18 +68,11 @@ function main(){
     var span = 5;
     var rateSpan = 0.3;
     $('#content_top_ad').remove();
-    $("#btnTogglePara").click(function(){        
+    $("#btnTogglePara").click(function(){
+        $('.diff-result').html(JsDiff.convertChangesToXML(JsDiff.diffWords(textarea.val(),$('#content_main p').text())));
         $('#content_main p').toggle();
-        lines = diffString(textarea.val(),$('#content_main p').text()).split('.');
-        for(var i=0;i<lines.length;i++){
-            if(!/.+?<del>\w+$/.test(lines[i])){
-                lines[i]+='.<br><br>';
-            }
-        }
-        $('#content_main p').toggle();
-        $('.diff-result').html(lines.join(''));
     });
-    textarea.keydown(function(e){
+    $('body').keydown(function(e){
         if(e.ctrlKey && e.keyCode == 67){
             if(audio.paused){
                 audio.play();
