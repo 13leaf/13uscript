@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         Easy Voa Listen and write
 // @namespace    http://fengwang.org.cn
-// @version      0.3
+// @version      0.4
 // @description  voa enhance listen to write
 // @author       wangfeng
 // @require http://code.jquery.com/jquery-1.9.1.js
 // @require https://cdn.jsdelivr.net/jsdiff/1.4.0/diff.min.js
-// @match        http://www.easyvoa.com/voa-speacial-english/*
+// @match        http://www.easyvoa.com/*/*
+// @match        http://www.51voa.com/*/*
 // @grant        none
 // ==/UserScript==
 /* jshint -W097 */
@@ -53,15 +54,26 @@ function displayShortCuts(){
 }
 
 function main(){
-    var audioUrl = $('#playbar a').attr('href');
+    var page = 'easyvoa';
+    if(location.host == 'www.51voa.com'){
+        page='51voa';
+    }
+    if(page == 'easyvoa'){
+        var audioUrl = $('#playbar a').attr('href');
+        var contentParas = $('#content_main p');
+    }else if(page == '51voa'){
+        var audioUrl = $('#mp3').attr('href');
+        var contentParas = $('#content p');
+    }
+    
     if(!audioUrl) return;
-    addGlobalStyle('del {       text-decoration: none;  color: #b30000; background: #fadad7;} ins {     background: #eaf2c2;    color: #406619; text-decoration: none;}');
+    addGlobalStyle('del {       text-decoration: none;  color: #b30000; background: #fadad7;} ins {     background: #eaf2c2;    color: #406619; text-decoration: none;} .enhance-toolbar-wrapper{max-width:800px;}');
     $('#playbar').after($('<div class="enhance-toolbar-wrapper">'+
                           '<audio style="width:100%" controls="" src="'+audioUrl+'"></audio><textarea style="width:100%;height: 1000px;padding:12px;font-size:18px;"></textarea>'+
-                          '<button id="btnTogglePara">查看原文</button></div>'+'<div class="diff-result" contenteditable="true" style="font-size:16px;line-height:1.5;white-space:pre-wrap;position:fixed;top:7px;right:7px;width:30%;background:white;height:100%;overflow-y:auto;"></div>'
+                          '<button id="btnTogglePara">查看原文</button></div>'+'<div class="diff-result" contenteditable="true" style="display:none;font-size:16px;line-height:1.5;white-space:pre-wrap;position:fixed;top:7px;right:7px;width:30%;background:white;height:100%;overflow-y:auto;"></div>'
                          ));
     displayShortCuts();
-    $('#content_main p').toggle();
+    contentParas.toggle();
     var audio=$('audio')[0];
     var textarea = $('textarea');
     var markTime = 0;
@@ -69,8 +81,8 @@ function main(){
     var rateSpan = 0.3;
     $('#content_top_ad').remove();
     $("#btnTogglePara").click(function(){
-        $('.diff-result').html(JsDiff.convertChangesToXML(JsDiff.diffWords(textarea.val(),$('#content_main p').text())));
-        $('#content_main p').toggle();
+        $('.diff-result').show().html(JsDiff.convertChangesToXML(JsDiff.diffWords(textarea.val(),contentParas.text())));
+        contentParas.toggle();
     });
     $('body').keydown(function(e){
         if(e.ctrlKey && e.keyCode == 67){
@@ -109,6 +121,7 @@ function main(){
 }
 
 main();
+
 
 
 
