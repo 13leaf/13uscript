@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>听力</title>
+    <meta charset="utf-8">
+</head>
+<body>
+<div id="container">
+    <h1>drag audio file here</h1>
+    <div>
+        or enter url:
+        <input type="text" id="audioInput">
+        <button type="button" id="btnAudio">ok</button>
+    </div>
+</div>
+<textarea  style="width:100%;height: 600px;padding:12px;font-size:18px;" ></textarea>
+
+<script>
+    {
+        window.addEventListener('dragover', function(event){
+            if (event.preventDefault) {
+                event.preventDefault();
+            }
+        });
+        
+        let audioInput = document.getElementById('audioInput');
+        let audio = null;
+        
+        document.getElementById('btnAudio').onclick=function(e){
+            let url = audioInput.value;
+            var e = document.createElement("audio");
+            e.src = url;
+            e.setAttribute("controls", "controls");
+            e.setAttribute("autoplay", "true");
+            document.getElementById("container").appendChild(e);
+            audio = e;
+        };
+        
+        window.addEventListener('drop', function(event){
+            event.preventDefault();
+            if(event.stopPropagation) {event.stopPropagation();}
+            var item = event.dataTransfer.items[0];
+            var file=item.getAsFile();
+            console.log(file.type);
+            if (file.type.match(/(audio|video).*/)) {
+                var reader = new FileReader();
+                reader.onload = function(d) {
+                    var e = document.createElement("audio");
+                    e.src = d.target.result;
+                    e.setAttribute("type", file.type);
+                    e.setAttribute("controls", "controls");
+                    e.setAttribute("autoplay", "true");
+                    document.getElementById("container").appendChild(e);
+                    audio = e;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        var markTime = 0;
+        var span = 5;
+        var rateSpan = 0.3;
+        document.body.onkeydown=function(e){
+        if(e.ctrlKey && e.keyCode == 67){
+            if(audio.paused){
+                audio.play();
+            }else{
+                audio.pause();
+            }
+            return false;
+        }else if(e.ctrlKey && e.keyCode == 77){
+            markTime = audio.currentTime
+            audio.pause();
+            return false;
+        }else if(e.ctrlKey && e.keyCode == 90){
+            audio.currentTime = markTime
+            audio.play();
+            return false;
+        }else if(e.ctrlKey && e.keyCode == 188){
+            audio.currentTime -= span;
+            audio.play();
+            return false;
+        }else if(e.ctrlKey && e.keyCode == 190){
+            audio.currentTime += span;
+            audio.play();
+            return false;
+        }else if(e.ctrlKey && e.keyCode == 186){
+            audio.playbackRate  -= rateSpan;
+            audio.play();
+            return false;
+        }else if(e.ctrlKey && e.keyCode == 222){
+            audio.playbackRate  += rateSpan;
+            audio.play();
+            return false;
+        }
+    };
+    }
+</script>
+</body>
+</html>
